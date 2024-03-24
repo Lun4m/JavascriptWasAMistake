@@ -31,24 +31,55 @@ function getURLsFromHTML(htmlBody, baseUrl) {
   return hrefs;
 }
 
-async function crawlPage(url) {
-  const response = await fetch(url, {
+async function crawlPage(baseURL, currentURL, pages) {
+  if (!currentURL.startsWith(baseURL)) {
+    return pages;
+  }
+
+  try {
+    const normURL = normalizeURL(currentURL);
+    if (pages[normURL]) {
+      pages[normURL]++;
+      return pages;
+    } else {
+      pages[normURL] = 1;
+    }
+  } catch (error) {
+    return pages;
+  }
+
+  console.log(`Fetching page at ${currentURL}`);
+  const response = await fetch(currentURL, {
     method: "GET",
     mode: "cors",
   });
 
   if (response.status >= 400) {
-    console.log(`Unable to fetch page, status code: ${response.status}`);
-    return;
+    console.log(
+      `Unable to fetch page ${currentURL}\nStatus code: ${response.status}`,
+    );
+    console.log("---------");
+    return pages;
   }
+
   if (!response.headers.get("content-type").startsWith("text/html")) {
     console.log(
-      `Unable to fetch this content-type: ${response.headers["content-type"]}`,
+      `Unable to fetch page ${currentURL}\nInvalid content-type: ${response.headers["content-type"]}`,
     );
-    return;
+    console.log("---------");
+    return pages;
   }
+
   const body = await response.text();
-  console.log(body);
+  const bodyURLs = getURLsFromHTML(body);
+  for (const url of bodyURLs) {
+    // Skip if linking to different website
+    if (url.startsWith("http")) {
+      continue;
+    }
+    pages = await crawlPage(baseURL, `${baseURL}/${url}`, pages);
+  }
+  return pages;
 }
 
 module.exports = {

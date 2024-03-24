@@ -9,7 +9,11 @@ function main() {
   }
   const baseURL = argv[2];
   console.log(`Crawler initialized at ${baseURL}`);
-  crawlPage(baseURL);
+
+  crawlPage(baseURL, baseURL, {}).then((pages) => {
+    console.log(`Fetch report for ${baseURL}:`);
+    console.log(pages);
+  });
 }
 
 main();
