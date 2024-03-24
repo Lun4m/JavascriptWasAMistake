@@ -1,8 +1,8 @@
 const { crawlPage } = require("./crawl");
+const { printReport } = require("./report");
+const { argv, exit } = require("node:process");
 
 function main() {
-  const { argv, exit } = require("node:process");
-
   if (argv.length !== 3) {
     console.log("USAGE: npm run start <url>");
     exit();
@@ -11,8 +11,7 @@ function main() {
   console.log(`Crawler initialized at ${baseURL}`);
 
   crawlPage(baseURL, baseURL, {}).then((pages) => {
-    console.log(`Fetch report for ${baseURL}:`);
-    console.log(pages);
+    printReport(pages, baseURL);
   });
 }
 
