@@ -71,13 +71,9 @@ async function crawlPage(baseURL, currentURL, pages) {
   }
 
   const body = await response.text();
-  const bodyURLs = getURLsFromHTML(body);
+  const bodyURLs = getURLsFromHTML(body, baseURL);
   for (const url of bodyURLs) {
-    // Skip if linking to different website
-    if (url.startsWith("http")) {
-      continue;
-    }
-    pages = await crawlPage(baseURL, `${baseURL}/${url}`, pages);
+    pages = await crawlPage(baseURL, url, pages);
   }
   return pages;
 }
