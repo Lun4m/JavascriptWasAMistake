@@ -31,3 +31,28 @@ function getURLsFromHTML(htmlBody, baseUrl) {
   return hrefs;
 }
 
+async function crawlPage(url) {
+  const response = await fetch(url, {
+    method: "GET",
+    mode: "cors",
+  });
+
+  if (response.status >= 400) {
+    console.log(`Unable to fetch page, status code: ${response.status}`);
+    return;
+  }
+  if (!response.headers.get("content-type").startsWith("text/html")) {
+    console.log(
+      `Unable to fetch this content-type: ${response.headers["content-type"]}`,
+    );
+    return;
+  }
+  const body = await response.text();
+  console.log(body);
+}
+
+module.exports = {
+  crawlPage,
+  normalizeURL,
+  getURLsFromHTML,
+};
