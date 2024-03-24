@@ -17,3 +17,17 @@ function normalizeURL(inputUrl) {
   }
 }
 
+function getURLsFromHTML(htmlBody, baseUrl) {
+  const dom = new JSDOM(htmlBody);
+  const links = dom.window.document.querySelectorAll("a");
+  const hrefs = [];
+  for (const link of links) {
+    let href = link.href;
+    if (href.startsWith("/")) {
+      href = `${baseUrl}${href}`;
+    }
+    hrefs.push(href);
+  }
+  return hrefs;
+}
+

@@ -1,5 +1,5 @@
 const { test, expect } = require("@jest/globals");
-const { normalizeURL } = require("./crawl");
+const { normalizeURL, getURLsFromHTML } = require("./crawl");
 
 test("normalizeURL: https + domain", () => {
   const url = "https://www.website.com";
@@ -38,3 +38,12 @@ test("normalizeURL: not an url", () => {
   }).toThrow(Error("invalid url"));
 });
 
+test("getURLfromHTML", () => {
+  const url = "https://coolwebdev.com";
+  const html =
+    '<html><body><a href="https://coolwebdev.com"><span>Enter website</span></a><a href="/secret/link"</a></body>';
+  expect(getURLsFromHTML(html, url)).toEqual([
+    "https://coolwebdev.com/",
+    "https://coolwebdev.com/secret/link",
+  ]);
+});
