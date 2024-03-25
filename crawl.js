@@ -4,31 +4,41 @@ const { JSDOM } = require("jsdom");
 function normalizeURL(inputUrl) {
   try {
     const urlObj = new URL(inputUrl);
-    if (urlObj.pathname.endsWith("/")) {
-      if (urlObj.pathname.length === 1) {
-        return urlObj.hostname;
-      } else {
-        urlObj.pathname = urlObj.pathname.slice(0, -1);
-      }
+    let path = `${urlObj.host}${urlObj.pathname}`;
+    if (path.length > 1 && path.endsWith("/")) {
+      path = path.slice(0, -1);
     }
-    return `${urlObj.hostname}${urlObj.pathname}`;
+    return path;
   } catch (err) {
-    throw Error("invalid url");
+    throw Error(`Invalid url: ${inputUrl}`);
   }
 }
 
 function getURLsFromHTML(htmlBody, baseUrl) {
   const dom = new JSDOM(htmlBody);
   const links = dom.window.document.querySelectorAll("a");
-  const hrefs = [];
+  const urls = [];
+
   for (const link of links) {
     let href = link.href;
     if (href.startsWith("/")) {
-      href = `${baseUrl}${href}`;
+      try {
+        urls.push(`${baseUrl}${href}`);
+      } catch (err) {
+        console.log(`${err.message}: ${href}`);
+      }
+    } else {
+      if (href.startsWith("http")) {
+        continue;
+      }
+      try {
+        urls.push(`${baseUrl}/${href}`);
+      } catch (err) {
+        console.log(`${err.message}: ${href}`);
+      }
     }
-    hrefs.push(href);
   }
-  return hrefs;
+  return urls;
 }
 
 async function crawlPage(baseURL, currentURL, pages) {
@@ -41,9 +51,8 @@ async function crawlPage(baseURL, currentURL, pages) {
     if (pages[normURL]) {
       pages[normURL]++;
       return pages;
-    } else {
-      pages[normURL] = 1;
     }
+    pages[normURL] = 1;
   } catch (error) {
     return pages;
   }

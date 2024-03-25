@@ -35,7 +35,7 @@ test("normalizeURL: not an url", () => {
   const url = "httwebsitecom";
   expect(() => {
     normalizeURL(url);
-  }).toThrow(Error("invalid url"));
+  }).toThrow(Error(`Invalid url: ${url}`));
 });
 
 test("getURLfromHTML", () => {
